@@ -1,16 +1,17 @@
 after_success:
-- npm run coverage
+  - npm run coverage
 before_deploy:
-- npm run bundle
+  - npm install typescript@1.7.5
+  - npm run bundle
 before_script:
-- npm run typings
+  - npm run typings
 cache:
   directories:
-  - node_modules
-  - typings
+    - node_modules
+    - typings
 language: node_js
 node_js:
-- '0.12'
-- '4'
-- '5'
+  - '0.12'
+  - '4'
+  - '5'
 sudo: false

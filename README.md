@@ -12,6 +12,10 @@ A gulp plugin for formatting TypeScript files.
 npm install gulp-tsfmt
 ```
 
+### TypeScript Version
+
+`gulp-tsfmt` doesn't have own depency on TypeScript. You are expected to `npm install typescript` your own version. It's currently testes with version `1.7.5`.
+
 ### Usage
 
 The snippet below formats and replaces in place each TypeScript file.

@@ -17,7 +17,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/pspeter3/gulp-tsfmt.git"
+    "url": "https://github.com/alexgorbatchev/gulp-tsfmt.git"
   },
   "keywords": [
     "gulpplugin",
@@ -27,9 +27,9 @@
   "author": "Phips Peter",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/pspeter3/gulp-tsfmt/issues"
+    "url": "https://github.com/alexgorbatchev/gulp-tsfmt/issues"
   },
-  "homepage": "https://github.com/pspeter3/gulp-tsfmt",
+  "homepage": "https://github.com/alexgorbatchev/gulp-tsfmt",
   "devDependencies": {
     "chai": "^3.4.1",
     "coveralls": "^2.11.6",

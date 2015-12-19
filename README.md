@@ -40,6 +40,25 @@ gulp.task('format', () => {
 });
 ```
 
+### Options
+
+Here are the default values and available configuration options:
+
+```javascript
+IndentSize: 2
+TabSize: 2
+NewLineCharacter: "\n"
+ConvertTabsToSpaces: true
+InsertSpaceAfterCommaDelimiter: true
+InsertSpaceAfterSemicolonInForStatements: true
+InsertSpaceBeforeAndAfterBinaryOperators: true
+InsertSpaceAfterKeywordsInControlFlowStatements: true
+InsertSpaceAfterFunctionKeywordForAnonymousFunctions: false
+InsertSpaceAfterOpeningAndBeforeClosingNonemptyParenthesis: false
+PlaceOpenBraceOnNewLineForFunctions: false
+PlaceOpenBraceOnNewLineForControlBlocks: false
+```
+
 ### License
 
 MIT

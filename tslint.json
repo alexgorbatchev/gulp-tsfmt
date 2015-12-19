@@ -17,8 +17,8 @@
     "eofline": true,
     "forin": true,
     "indent": [
-      true,
-      4
+      false,
+      2
     ],
     "interface-name": false,
     "jsdoc-format": true,

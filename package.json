@@ -13,8 +13,7 @@
     "bundle": "gulp bundle",
     "coverage": "cat ./coverage/lcov.info | coveralls",
     "test": "gulp test",
-    "typings": "tsd reinstall --save && tsd rebundle",
-    "prepublish": "gulp bundle"
+    "typings": "tsd reinstall --save && tsd rebundle"
   },
   "repository": {
     "type": "git",

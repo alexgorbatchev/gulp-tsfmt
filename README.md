@@ -1,5 +1,10 @@
 # gulp-tsfmt
 
+[![GitTip](http://img.shields.io/gittip/alexgorbatchev.svg?style=flat)](https://www.gittip.com/alexgorbatchev/)
+[![Dependency status](http://img.shields.io/david/alexgorbatchev/gulp-tsfmt.svg?style=flat)](https://david-dm.org/alexgorbatchev/gulp-tsfmt)
+[![devDependency Status](http://img.shields.io/david/dev/alexgorbatchev/gulp-tsfmt.svg?style=flat)](https://david-dm.org/alexgorbatchev/gulp-tsfmt#info=devDependencies)
+[![Build Status](http://img.shields.io/travis/alexgorbatchev/gulp-tsfmt.svg?style=flat&branch=master)](https://travis-ci.org/alexgorbatchev/gulp-tsfmt)
+
 A gulp plugin for formatting TypeScript files.
 
 ## Installation

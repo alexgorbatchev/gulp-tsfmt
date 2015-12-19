@@ -15,6 +15,5 @@ trim_trailing_whitespace = false
 
 [*.ts]
 quote_type = double
-indent_size = 4
 max_line_length = 140
-continuation_indent_size = 4
+continuation_indent_size = 2

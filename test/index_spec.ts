@@ -77,7 +77,7 @@ describe("gulp-tsfmt", () => {
     describe("streams", () => {
         it("should not be supported", (done) => {
             var file = new VinylFile({
-                contents: new stream.Readable()
+                contents: new stream.Transform()
             });
             var formatter = tsfmt();
             formatter.once("error", (error: Error) => {

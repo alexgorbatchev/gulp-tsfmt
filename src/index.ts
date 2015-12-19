@@ -6,7 +6,7 @@ import ts = require("typescript");
 var PLUGIN_NAME = "gulp-tsfmt";
 
 var DEFAULTS: {options?: ts.FormatCodeOptions; target?: string} = {
-    options: {
+    options: <ts.FormatCodeOptions>{
         IndentSize: 4,
         TabSize: 4,
         NewLineCharacter: "\r\n",
@@ -44,7 +44,7 @@ class Transformer {
     }
 
     private _toSourceFile(file: VinylFile): ts.SourceFile {
-        return ts.createSourceFile(path.basename(file.path), file.contents.toString(), this._target, ts.servicesVersion);
+        return ts.createSourceFile(path.basename(file.path), file.contents.toString(), this._target);
     }
 
     private _formatSource(source: ts.SourceFile): ts.TextChange[] {
@@ -52,7 +52,7 @@ class Transformer {
     }
 
     private _applyEdits(file: VinylFile, edits: ts.TextChange[]): Buffer {
-        const reduce = (contents, edit) => {
+        const reduce = (contents: Buffer, edit: ts.TextChange) => {
             var head = contents.slice(0, edit.span.start);
             var tail = contents.slice(edit.span.start + edit.span.length);
             var change = new Buffer(edit.newText, "utf8");
@@ -77,7 +77,7 @@ function formatOptions(options: {
     PlaceOpenBraceOnNewLineForFunctions?: boolean;
     PlaceOpenBraceOnNewLineForControlBlocks?: boolean;
 }): ts.FormatCodeOptions {
-    var defaults: any = DEFAULTS.options;
+    var defaults = DEFAULTS.options;
     var params: any = options;
     var result: any = {};
     Object.keys(defaults).forEach((key) => {

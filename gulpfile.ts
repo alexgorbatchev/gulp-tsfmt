@@ -1,5 +1,5 @@
 /// <reference path="./typings/tsd.d.ts"/>
-import del = require("del");
+import rimraf = require("rimraf");
 import dts = require("dts-bundle");
 import gulp = require("gulp");
 import istanbul = require("gulp-istanbul");
@@ -46,7 +46,7 @@ register(Task.bundle, [Task.copy], () => {
 });
 
 register(Task.clean, [], (callback) => {
-    del(root(build()), callback);
+    rimraf(root(build()), callback);
 });
 
 register(Task.copy, [Task.scripts], () => {
@@ -106,9 +106,9 @@ register(Task.spec, [Task.scripts], (callback) => {
                 .on("finish", () => {
                     var err: Error = null;
                     var coverage = istanbul.summarizeCoverage();
-                    var incomplete = Object.keys(coverage).filter((key) => {
-                        return coverage[key].pct !== 100;
-                    });
+                    var incomplete = Object.keys(coverage).filter(key =>
+                        coverage[key].hasOwnProperty("pct") && coverage[key].pct !== 100
+                    );
                     if (incomplete.length > 0) {
                         err = new Error(`Incomplete coverage for ${incomplete.join(", ")}`);
                     }
@@ -123,7 +123,7 @@ function name(task: Task): string {
     return Task[task];
 }
 
-function register(task: Task, deps: Task[], callback?: gulp.ITaskCallback): void {
+function register(task: Task, deps: Task[], callback?: gulp.TaskCallback): void {
     gulp.task(name(task), deps.map(name), callback);
 }
 

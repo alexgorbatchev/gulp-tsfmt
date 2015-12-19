@@ -31,25 +31,25 @@
   },
   "homepage": "https://github.com/pspeter3/gulp-tsfmt",
   "devDependencies": {
-    "chai": "^3.3.0",
-    "coveralls": "^2.11.2",
-    "del": "^2.0.2",
+    "chai": "^3.4.1",
+    "coveralls": "^2.11.6",
     "dts-bundle": "^0.3.0",
-    "gulp": "^3.8.11",
-    "gulp-istanbul": "^0.10.1",
-    "gulp-mocha": "^2.0.1",
-    "gulp-tslint": "^3.3.1",
-    "gulp-typescript": "^2.5.0",
-    "sinon": "^1.14.1",
-    "through2": "^0.6.5",
-    "ts-node": "^0.2.4",
+    "gulp": "^3.9.0",
+    "gulp-istanbul": "^0.10.3",
+    "gulp-mocha": "^2.2.0",
+    "gulp-tslint": "^4.2.1",
+    "gulp-typescript": "^2.10.0",
+    "rimraf": "^2.4.4",
+    "sinon": "^1.17.2",
+    "ts-node": "^0.5.4",
     "tsd": "^0.6.0-beta.5",
-    "typescript": "^1.6.2",
-    "vinyl": "^1.0.0"
+    "vinyl": "^1.1.0"
   },
   "dependencies": {
     "gulp-util": "^3.0.4",
-    "through2": "^0.6.3"
+    "through2": "^0.6.3",
+    "tslint": "^3.2.0",
+    "typescript": "^1.7.5"
   },
   "typescript": {
     "definition": "gulp-tsfmt.d.ts"

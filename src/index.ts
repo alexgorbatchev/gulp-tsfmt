@@ -5,66 +5,9 @@ import ts = require("typescript");
 
 var PLUGIN_NAME = "gulp-tsfmt";
 
-var DEFAULTS: { options?: ts.FormatCodeOptions; target?: string } = {
-  options: <ts.FormatCodeOptions>{
-    IndentSize: 2,
-    TabSize: 2,
-    NewLineCharacter: "\n",
-    ConvertTabsToSpaces: true,
-    InsertSpaceAfterCommaDelimiter: true,
-    InsertSpaceAfterSemicolonInForStatements: true,
-    InsertSpaceBeforeAndAfterBinaryOperators: true,
-    InsertSpaceAfterKeywordsInControlFlowStatements: true,
-    InsertSpaceAfterFunctionKeywordForAnonymousFunctions: false,
-    InsertSpaceAfterOpeningAndBeforeClosingNonemptyParenthesis: false,
-    PlaceOpenBraceOnNewLineForFunctions: false,
-    PlaceOpenBraceOnNewLineForControlBlocks: false
-  },
-  target: "ES5"
-};
-
-class Transformer {
-  private _formatter: Formatter;
-  private _options: ts.FormatCodeOptions;
-  private _rulesProvider: RulesProvider;
-  private _target: ts.ScriptTarget;
-
-  constructor(options: ts.FormatCodeOptions, target: ts.ScriptTarget) {
-    this._formatter = (<{ formatting?: Formatter }>ts).formatting;
-    this._options = options;
-    this._rulesProvider = new this._formatter.RulesProvider();
-    this._rulesProvider.ensureUpToDate(this._options);
-    this._target = target;
-  }
-
-  process(file: VinylFile): void {
-    var source = this._toSourceFile(file);
-    var edits = this._formatSource(source);
-    file.contents = this._applyEdits(file, edits);
-  }
-
-  private _toSourceFile(file: VinylFile): ts.SourceFile {
-    return ts.createSourceFile(path.basename(file.path), file.contents.toString(), this._target);
-  }
-
-  private _formatSource(source: ts.SourceFile): ts.TextChange[] {
-    return this._formatter.formatDocument(source, this._rulesProvider, this._options);
-  }
-
-  private _applyEdits(file: VinylFile, edits: ts.TextChange[]): Buffer {
-    const reduce = (contents: Buffer, edit: ts.TextChange) => {
-      var head = contents.slice(0, edit.span.start);
-      var tail = contents.slice(edit.span.start + edit.span.length);
-      var change = new Buffer(edit.newText, "utf8");
-      return Buffer.concat([head, change, tail]);
-    };
-
-    return edits.reduceRight(reduce, file.contents);
-  }
-}
-
-function formatOptions(options: {
+export interface FormatCodeOptionsWithDefaults {
   IndentSize?: number;
+  IndentStyle?: ts.IndentStyle;
   TabSize?: number;
   NewLineCharacter?: string;
   ConvertTabsToSpaces?: boolean;
@@ -74,9 +17,59 @@ function formatOptions(options: {
   InsertSpaceAfterKeywordsInControlFlowStatements?: boolean;
   InsertSpaceAfterFunctionKeywordForAnonymousFunctions?: boolean;
   InsertSpaceAfterOpeningAndBeforeClosingNonemptyParenthesis?: boolean;
+  InsertSpaceAfterOpeningAndBeforeClosingNonemptyBrackets?: boolean;
   PlaceOpenBraceOnNewLineForFunctions?: boolean;
   PlaceOpenBraceOnNewLineForControlBlocks?: boolean;
-}): ts.FormatCodeOptions {
+}
+
+export interface Params {
+  options?: FormatCodeOptionsWithDefaults;
+  compilerOptions?: ts.CompilerOptions;
+}
+
+interface SourceFileVersion {
+  filename: string;
+  version: number;
+  text: string;
+}
+
+var DEFAULTS: { options?: ts.FormatCodeOptions; compilerOptions?: ts.CompilerOptions } = {
+  options: <ts.FormatCodeOptions>{
+    IndentSize: 2,
+    IndentStyle: ts.IndentStyle.Smart,
+    TabSize: 2,
+    NewLineCharacter: "\n",
+    ConvertTabsToSpaces: true,
+    InsertSpaceAfterCommaDelimiter: true,
+    InsertSpaceAfterSemicolonInForStatements: true,
+    InsertSpaceBeforeAndAfterBinaryOperators: true,
+    InsertSpaceAfterKeywordsInControlFlowStatements: true,
+    InsertSpaceAfterFunctionKeywordForAnonymousFunctions: false,
+    InsertSpaceAfterOpeningAndBeforeClosingNonemptyParenthesis: false,
+    InsertSpaceAfterOpeningAndBeforeClosingNonemptyBrackets: false,
+    PlaceOpenBraceOnNewLineForFunctions: false,
+    PlaceOpenBraceOnNewLineForControlBlocks: false
+  },
+  compilerOptions: {
+    target: ts.ScriptTarget.ES5
+  }
+};
+
+function process(file: VinylFile, options: ts.FormatCodeOptions, compilerOptions: ts.CompilerOptions): void {
+  const sourceFile: SourceFileVersion = {
+      filename: path.basename(file.path),
+      version: 1,
+      text: file.contents.toString()
+    };
+
+  const langSvc = inMemoryLanguageService(sourceFile);
+  const textChanges = langSvc.getFormattingEditsForDocument(sourceFile.filename, options);
+  const formatted = formatCode(sourceFile.text, textChanges);
+
+  file.contents = new Buffer(formatted, "utf8");
+}
+
+function formatOptions(options: FormatCodeOptionsWithDefaults): ts.FormatCodeOptions {
   var defaults = DEFAULTS.options;
   var params: any = options;
   var result: any = {};
@@ -86,54 +79,50 @@ function formatOptions(options: {
   return result;
 }
 
-function scriptTarget(target: string): ts.ScriptTarget {
-  if (!ts.ScriptTarget.hasOwnProperty(target)) {
-    throw new gutil.PluginError(PLUGIN_NAME, `${target} is not a valid script target`);
-  }
-  return (<{ [key: string]: ts.ScriptTarget }>(<any>ts).ScriptTarget)[target];
+// From https://github.com/Microsoft/TypeScript/issues/1651#issuecomment-69877863
+function formatCode(orig: string, changes: ts.TextChange[]): string {
+    var result = orig;
+    for (var i = changes.length - 1; i >= 0; i--) {
+        var change = changes[i];
+        var head = result.slice(0, change.span.start);
+        var tail = result.slice(change.span.start + change.span.length);
+        result = head + change.newText + tail;
+    }
+    return result;
 }
 
-function format(params?: {
-  options?: {
-    IndentSize?: number;
-    TabSize?: number;
-    NewLineCharacter?: string;
-    ConvertTabsToSpaces?: boolean;
-    InsertSpaceAfterCommaDelimiter?: boolean;
-    InsertSpaceAfterSemicolonInForStatements?: boolean;
-    InsertSpaceBeforeAndAfterBinaryOperators?: boolean;
-    InsertSpaceAfterKeywordsInControlFlowStatements?: boolean;
-    InsertSpaceAfterFunctionKeywordForAnonymousFunctions?: boolean;
-    InsertSpaceAfterOpeningAndBeforeClosingNonemptyParenthesis?: boolean;
-    PlaceOpenBraceOnNewLineForFunctions?: boolean;
-    PlaceOpenBraceOnNewLineForControlBlocks?: boolean;
-  };
-  target?: string
-}): NodeJS.ReadWriteStream {
+function inMemoryLanguageService(file: SourceFileVersion): ts.LanguageService {
+    var host: ts.LanguageServiceHost = {
+      getScriptFileNames: () => [ file.filename ],
+      getScriptVersion: filename => file.version.toString(),
+      getScriptSnapshot: filename => ts.ScriptSnapshot.fromString(file.text),
+      log: message => undefined,
+      trace: message => undefined,
+      error: message => undefined,
+      getDefaultLibFileName: () => "lib.d.ts",
+      getCurrentDirectory: () => "",
+      getCompilationSettings: () => { return {}; },
+    };
+
+    return ts.createLanguageService(host, ts.createDocumentRegistry());
+}
+
+export default function format(params?: Params): NodeJS.ReadWriteStream {
   params = params || DEFAULTS;
-  var options = params.options || DEFAULTS.options;
-  var target = params.target || DEFAULTS.target;
-  var transformer = new Transformer(formatOptions(options), scriptTarget(target));
+
+  var options = formatOptions(params.options || DEFAULTS.options);
+
   return through.obj(function(file: VinylFile, encoding: string, callback: () => void) {
     var stream = <NodeJS.ReadWriteStream>this;
     if (file.isStream()) {
       stream.emit("error", new gutil.PluginError(PLUGIN_NAME, "Streams are not supported"));
     }
     if (file.isBuffer()) {
-      transformer.process(file);
+      process(file, options, params.compilerOptions);
     }
     (<any>stream).push(file);
     callback();
   });
-}
-
-interface Formatter {
-  RulesProvider: { new (): RulesProvider };
-  formatDocument(source: ts.SourceFile, rulesProvider: RulesProvider, options: ts.FormatCodeOptions): ts.TextChange[];
-}
-
-interface RulesProvider {
-  ensureUpToDate(options: ts.FormatCodeOptions): void;
 }
 
 interface VinylFile {
@@ -142,5 +131,3 @@ interface VinylFile {
   isBuffer(): boolean;
   isStream(): boolean;
 }
-
-export = format;
